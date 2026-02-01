@@ -1,83 +1,422 @@
-// 1. Typing Effect
-const textElement = document.getElementById('typing');
-const words = ["Web Developer", "Programmer", "Tech Enthusiast"];
-let wordIndex = 0;
-let charIndex = 0;
-let isDeleting = false;
-
-function typeEffect() {
-    const currentWord = words[wordIndex];
-    if (isDeleting) {
-        textElement.textContent = currentWord.substring(0, charIndex--);
-    } else {
-        textElement.textContent = currentWord.substring(0, charIndex++);
-    }
-    let typeSpeed = isDeleting ? 100 : 200;
-    if (!isDeleting && charIndex === currentWord.length) {
-        isDeleting = true; typeSpeed = 2000; 
-    } else if (isDeleting && charIndex === 0) {
-        isDeleting = false; wordIndex = (wordIndex + 1) % words.length; typeSpeed = 500;
-    }
-    setTimeout(typeEffect, typeSpeed);
-}
-document.addEventListener('DOMContentLoaded', typeEffect);
-
-// 2. Dark Mode (Default Dark)
-const toggleSwitch = document.querySelector('.theme-switch-wrapper');
-const icon = document.querySelector('#theme-icon');
-const currentTheme = localStorage.getItem('theme');
-
-// Cek apakah user pernah pilih Light Mode. Jika tidak, tetap Dark.
-if (currentTheme === 'light') {
-    document.documentElement.setAttribute('data-theme', 'light');
-    icon.classList.replace('bx-sun', 'bx-moon');
-} else {
-    // Default Dark Mode
-    icon.classList.replace('bx-moon', 'bx-sun');
+/* --- 1. VARIABEL & RESET --- */
+:root {
+    --bg-color: #f8f9fa;
+    --text-color: #2d3436;
+    --accent-color: #0984e3; 
+    --secondary-text: #636e72;
+    --card-bg: #ffffff;
+    --card-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    --code-bg: #dfe6e9;
 }
 
-toggleSwitch.addEventListener('click', function(e) {
-    let theme = document.documentElement.getAttribute('data-theme');
-    if (theme === 'light') {
-        // Balik ke Dark (Default)
-        document.documentElement.removeAttribute('data-theme');
-        localStorage.setItem('theme', 'dark');
-        icon.classList.replace('bx-moon', 'bx-sun');
-    } else {
-        // Ubah ke Light
-        document.documentElement.setAttribute('data-theme', 'light');
-        localStorage.setItem('theme', 'light');
-        icon.classList.replace('bx-sun', 'bx-moon');
+[data-theme="dark"] {
+    --bg-color: #0a192f;
+    --text-color: #ccd6f6;
+    --accent-color: #64ffda;
+    --secondary-text: #8892b0;
+    --card-bg: #112240;
+    --card-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    --code-bg: #233554;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* Typography */
+h1, h2, h3, .tag, .logo, .tech-list span { font-family: 'Fira Code', monospace; }
+a { text-decoration: none; }
+
+/* --- 2. HEADER & NAVIGASI --- */
+header {
+    position: fixed; top: 0; width: 100%;
+    padding: 15px 5%;
+    display: flex; justify-content: space-between; align-items: center;
+    background: rgba(var(--bg-color), 0.9);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.logo { font-size: 1.1rem; color: var(--accent-color); font-weight: 600; }
+
+nav { display: flex; align-items: center; gap: 20px; }
+.nav-links { display: flex; list-style: none; gap: 30px; }
+.nav-links a { color: var(--text-color); font-size: 0.9rem; transition: color 0.3s; }
+.nav-links a:hover { color: var(--accent-color); }
+
+/* Theme Switcher */
+.theme-switch-wrapper {
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; width: 35px; height: 35px;
+    background-color: var(--code-bg); border-radius: 50%;
+    border: 1px solid var(--accent-color); transition: 0.3s;
+}
+.theme-switch-wrapper i { font-size: 1.1rem; color: var(--accent-color); }
+
+/* Hamburger (Mobile) */
+.hamburger { display: none; cursor: pointer; flex-direction: column; gap: 5px; }
+.hamburger .line { width: 25px; height: 3px; background-color: var(--text-color); transition: 0.3s; }
+
+/* --- 3. HERO SECTION --- */
+.hero {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 100px 10% 0;
+}
+.hero-content { max-width: 600px; }
+.tag { color: var(--accent-color); display: block; margin-bottom: 10px; font-size: 0.9rem; }
+.hero h1 { font-size: 3rem; line-height: 1.2; margin-bottom: 10px; }
+.typing-text { font-size: 1.5rem; color: var(--secondary-text); margin-bottom: 20px; font-family: 'Poppins', sans-serif; }
+
+#typing { color: var(--accent-color); border-right: 2px solid var(--accent-color); animation: blink 0.7s infinite; }
+@keyframes blink { 50% { border-color: transparent; } }
+
+.btn {
+    display: inline-block; padding: 12px 28px;
+    border: 1px solid var(--accent-color); color: var(--accent-color);
+    border-radius: 4px; margin-top: 25px; transition: 0.3s;
+    font-family: 'Fira Code', monospace; font-size: 0.9rem;
+}
+.btn:hover { background: rgba(100, 255, 218, 0.1); }
+
+/* Foto Profil Hero */
+.hero-img { display: flex; justify-content: center; align-items: center; }
+.img-box {
+    width: 320px; height: 320px;
+    border-radius: 50%; border: 4px solid var(--accent-color);
+    box-shadow: 0 0 30px rgba(0,0,0,0.15); overflow: hidden;
+    transition: transform 0.3s ease; background-color: var(--code-bg);
+}
+.img-box:hover { transform: scale(1.02); }
+.img-box img { width: 100%; height: 100%; object-fit: cover; }
+
+/* --- 4. SECTION UMUM --- */
+.section { padding: 80px 10%; }
+.section-title { font-size: 1.5rem; margin-bottom: 30px; display: flex; align-items: center; color: var(--text-color); }
+.section-title::after {
+    content: ""; display: block; width: 200px; height: 1px;
+    background: var(--secondary-text); margin-left: 20px; opacity: 0.5;
+}
+
+/* --- 5. SKILLS --- */
+.skills-desc { margin-bottom: 40px; max-width: 700px; color: var(--secondary-text); font-size: 1rem; }
+.skills-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; }
+.skill-card {
+    background: var(--card-bg); padding: 25px 15px;
+    text-align: center; border-radius: 12px;
+    box-shadow: var(--card-shadow); transition: 0.3s;
+    border: 1px solid transparent;
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+}
+.skill-card:hover { transform: translateY(-5px); border-color: var(--accent-color); }
+.skill-card i { font-size: 2.5rem; color: var(--secondary-text); transition: 0.3s; }
+.skill-card:hover i { color: var(--accent-color); }
+.skill-card h3 { font-size: 0.9rem; color: var(--text-color); }
+
+/* --- 6. PROJECTS --- */
+.projects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
+.project-card {
+    background: var(--card-bg); padding: 25px;
+    border-radius: 8px; box-shadow: var(--card-shadow); transition: 0.3s;
+}
+.project-card:hover { transform: translateY(-7px); }
+.card-header { display: flex; justify-content: space-between; margin-bottom: 20px; }
+.card-header i { font-size: 2rem; color: var(--accent-color); }
+.card-header .links a { color: var(--secondary-text); margin-left: 10px; font-size: 1.2rem; }
+.project-card h3 { margin-bottom: 10px; color: var(--text-color); font-size: 1.1rem; }
+.project-card p { color: var(--secondary-text); font-size: 0.9rem; margin-bottom: 20px; }
+.tech-list span { font-size: 0.8rem; margin-right: 15px; color: var(--secondary-text); }
+
+/* --- 7. CONTACT --- */
+.contact-desc { color: var(--secondary-text); margin-bottom: 30px; max-width: 500px; }
+.contact-wrapper { display: flex; flex-direction: column; gap: 15px; max-width: 500px; }
+.contact-card {
+    display: flex; align-items: center;
+    background: var(--card-bg); padding: 15px 20px;
+    border-radius: 12px; text-decoration: none; color: var(--text-color);
+    box-shadow: var(--card-shadow); border: 1px solid transparent;
+    transition: 0.3s; position: relative; overflow: hidden;
+}
+.contact-card .icon-box { font-size: 1.8rem; color: var(--accent-color); margin-right: 15px; }
+.contact-info h3 { font-size: 0.8rem; color: var(--secondary-text); }
+.contact-info span { font-size: 1rem; font-weight: 600; font-family: 'Fira Code', monospace; }
+.arrow-icon {
+    position: absolute; right: 20px; font-size: 1.2rem;
+    color: var(--secondary-text); opacity: 0; transform: translateX(-20px); transition: 0.3s;
+}
+.contact-card:hover { border-color: var(--accent-color); transform: translateY(-3px); }
+.contact-card:hover .arrow-icon { opacity: 1; transform: translateX(0); color: var(--accent-color); }
+
+/* --- 8. FOOTER & BACKGROUND --- */
+footer { text-align: center; padding: 20px; font-family: 'Fira Code', monospace; font-size: 0.8rem; color: var(--secondary-text); }
+
+.background-anim { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -5; pointer-events: none; overflow: hidden; }
+.blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; animation: floatBlob 25s infinite alternate ease-in-out; }
+.blob-1 { width: 400px; height: 400px; background: var(--accent-color); top: -150px; left: -150px; }
+.blob-2 { width: 500px; height: 500px; background: #8e44ad; bottom: -200px; right: -200px; animation-delay: -7s; }
+[data-theme="dark"] .blob { opacity: 0.15; filter: blur(100px); }
+
+.floating-icons { position: absolute; width: 100%; height: 100%; overflow: hidden; padding: 0; margin: 0; z-index: -4; }
+.floating-icons li { position: absolute; list-style: none; color: var(--text-color); font-family: 'Fira Code', monospace; opacity: 0.1; bottom: -150px; animation: floatUp 25s linear infinite; }
+
+/* Posisi Floating Icons */
+.floating-icons li:nth-child(1) { left: 20%; font-size: 20px; animation-duration: 20s; } 
+.floating-icons li:nth-child(2) { left: 80%; font-size: 40px; animation-duration: 25s; }
+.floating-icons li:nth-child(3) { left: 50%; font-size: 30px; animation-duration: 18s; }
+.floating-icons li:nth-child(4) { left: 10%; font-size: 30px; animation-duration: 22s; }
+.floating-icons li:nth-child(5) { left: 90%; font-size: 25px; animation-duration: 30s; }
+/* ... (dst) */
+
+@keyframes floatBlob { 0% { transform: translate(0,0); } 100% { transform: translate(50px, 50px); } }
+@keyframes floatUp { 0% { transform: translateY(0) rotate(0deg); opacity: 0.1; } 100% { transform: translateY(-1000px) rotate(360deg); opacity: 0; } }
+
+/* --- 9. ANIMASI SCROLL REVEAL (BARU) --- */
+.reveal {
+    opacity: 0;
+    transform: translateY(50px); /* Geser ke bawah 50px */
+    transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+    filter: blur(5px);
+}
+.reveal.active {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+}
+/* Staggered Delay agar muncul berurutan */
+.project-card:nth-child(2) { transition-delay: 0.1s; }
+.project-card:nth-child(3) { transition-delay: 0.2s; }
+.skill-card:nth-child(odd) { transition-delay: 0.1s; }
+
+/* --- 10. MEDIA QUERIES (RESPONSIVE HP) --- */
+@media (max-width: 900px) {
+    .hero { flex-direction: column-reverse; justify-content: center; text-align: center; padding-top: 120px; }
+    .hero-content { margin-top: 40px; }
+    .hero h1 { font-size: 2.5rem; }
+    .section { padding: 80px 5%; }
+}
+
+@media (max-width: 768px) {
+    header { padding: 15px 20px; }
+    .hamburger { display: flex; z-index: 1001; }
+    
+    /* Menu Fullscreen di HP */
+    .nav-links {
+        position: fixed; top: 0; right: 0;
+        height: 100vh; width: 70%;
+        background: var(--card-bg);
+        flex-direction: column; justify-content: center;
+        align-items: center;
+        box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+        transform: translateX(100%);
+        transition: transform 0.4s ease-in-out;
+        z-index: 999;
     }
-});
+    .nav-links.nav-active { transform: translateX(0); }
 
-// 3. Hamburger Menu
-const hamburger = document.querySelector('.hamburger');
-const navLinks = document.querySelector('.nav-links');
+    .hero { padding: 100px 20px 50px; min-height: auto; }
+    .hero-img { margin-bottom: 20px; }
+    .img-box { width: 200px; height: 200px; border-width: 3px; }
+    .hero h1 { font-size: 1.8rem; }
+    .typing-text { font-size: 1rem; }
+    
+    .section { padding: 60px 20px; }
+    .section-title { font-size: 1.3rem; }
+    .projects-grid { grid-template-columns: 1fr; }
+    .contact-info span { font-size: 0.9rem; }
+}
 
-hamburger.addEventListener('click', () => {
-    navLinks.classList.toggle('nav-active');
-});
+/* --- EFEK SHINY (KILAU) FOTO PROFIL --- */
 
-document.querySelectorAll('.nav-links a').forEach(item => {
-    item.addEventListener('click', () => {
-        navLinks.classList.remove('nav-active');
-    });
-});
+/* Pastikan .img-box memiliki posisi relative & overflow hidden 
+   (Biasanya sudah ada di kode sebelumnya, tapi ini untuk memastikan) */
+   .img-box {
+    position: relative; 
+    overflow: hidden; /* Agar kilau terpotong mengikuti bentuk lingkaran */
+}
 
-// 4. Scroll Reveal Animation
-const revealElements = document.querySelectorAll('.section-title, .about-text, .skill-card, .project-card, .contact-card, .skills-desc');
+/* Membuat elemen kilau cahaya */
+.img-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%; /* Posisi awal di luar kiri */
+    width: 50%; /* Lebar pita cahaya */
+    height: 100%;
+    
+    /* Warna gradasi: Transparan -> Putih Terang -> Transparan */
+    background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0) 100%);
+    
+    /* Miringkan cahaya agar terlihat dinamis */
+    transform: skewX(-25deg);
+    
+    /* Pastikan di atas gambar */
+    z-index: 2;
+    
+    /* Animasi: Nama, Durasi total, Loop selamanya */
+    animation: shinyEffect 3s infinite; 
+}
 
-revealElements.forEach(element => element.classList.add('reveal'));
+/* Keyframes untuk mengatur gerakan dan jeda waktu */
+@keyframes shinyEffect {
+    /* Mulai dari kiri */
+    0% {
+        left: -10%; 
+    }
+    
+    /* Gerakan selesai (sampai kanan) pada 20% dari total waktu (misal 1 detik) */
+    20% {
+        left: 100%; 
+    }
+    
+    /* Dari 20% sampai 100% (4 detik sisanya) diam di luar kanan (Jeda Waktu) */
+    100% {
+        left:100%; 
+    }
+}
 
-const scrollObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.classList.add('active');
-        } else {
-            entry.target.classList.remove('active');
-        }
-    });
-}, { threshold: 0.15 });
+/* --- TAMBAHAN: DATA DIRI & PENDIDIKAN --- */
 
-revealElements.forEach(el => scrollObserver.observe(el));
+.about-content-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-top: 40px;
+}
+
+.sub-heading {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    color: var(--accent-color);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Styling Data Diri */
+.bio-list {
+    list-style: none;
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    border: 1px solid transparent;
+    transition: 0.3s;
+}
+
+.bio-list:hover {
+    border-color: var(--accent-color);
+    transform: translateY(-5px);
+}
+
+.bio-list li {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    border-bottom: 1px dashed rgba(136, 146, 176, 0.2);
+    padding-bottom: 10px;
+}
+
+.bio-list li:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.bio-list .label {
+    font-weight: 600;
+    color: var(--secondary-text);
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9rem;
+}
+
+.bio-list .value {
+    color: var(--text-color);
+    text-align: right;
+    font-weight: 500;
+}
+
+.highlight-text {
+    color: var(--accent-color);
+    font-weight: bold;
+}
+
+/* Styling Timeline Pendidikan */
+.timeline {
+    position: relative;
+    padding-left: 20px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 5px;
+    bottom: 5px;
+    width: 2px;
+    background: var(--secondary-text);
+    opacity: 0.3;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 25px;
+    padding-left: 20px;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -26px; /* Menyesuaikan posisi titik */
+    top: 5px;
+    width: 14px;
+    height: 14px;
+    background: var(--bg-color);
+    border: 2px solid var(--accent-color);
+    border-radius: 50%;
+    z-index: 1;
+}
+
+.timeline-item:hover::before {
+    background: var(--accent-color);
+    box-shadow: 0 0 10px var(--accent-color);
+}
+
+.timeline-item .year {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.85rem;
+    color: var(--accent-color);
+    margin-bottom: 5px;
+    display: inline-block;
+    background: rgba(100, 255, 218, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.timeline-item .school {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+/* Responsif untuk HP */
+@media (max-width: 768px) {
+    .about-content-grid {
+        grid-template-columns: 1fr; /* Tumpuk ke bawah di HP */
+        gap: 30px;
+    }
+    
+    .timeline::before {
+        left: 0;
+    }
+    
+    .timeline-item::before {
+        left: -26px; /* Reset posisi titik di mobile */
+    }
+}
